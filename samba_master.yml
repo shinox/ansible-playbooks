@@ -1,5 +1,15 @@
 ---
 - hosts: master
+  vars:
+      smbconfig:
+          - - "comment = BeeGFS file system "
+            - "public = yes "
+            - "path = /mnt/beegfs "
+            - "browsable = yes "
+            - "writable = yes "
+            - "read only = no "
+            - "valid users = beegfs"
+            
   tasks:
   - name: Install/update samba package
     apt:
@@ -17,22 +27,18 @@
     file: path=/mnt/beegfs state=directory
 
   - name: Add bee config to smb.conf
-    copy: src=/home/masterbee/ansible/files/master/smb.conf dest=/etc/samba/smb.conf owner=root group=root mode=0744 backup=yes
-    # lineinfile:
-    #  dest=/etc/samba/smb.conf
-    #  line="[beegfs] \
-    #        comment = BeeGFS file system \
-    #        public = yes \
-    #        path = /mnt/beegfs \
-    #        browsable = yes \
-    #        writable = yes \
-    #        read only = no \
-    #        valid users = beegfs"
-    #   owner=root
-    #   state=present
-    #   insertafter=EOF
-    #   create=False
-
+  #  copy: src=/home/masterbee/ansible/files/master/smb.conf dest=/etc/samba/smb.conf owner=root group=root mode=0744 backup=yes
+  ## OR 
+    lineinfile:
+        dest: /etc/samba/smb.conf
+        regexp: "^# {{ item }}"
+        line:   "{{ item }}" 
+        owner:  root
+        state:  present
+    ##    insertafter: EOF
+        create: False
+    with_items: "{{ smbconfig }}" 
+    
     notify:
       - restart samba
 
