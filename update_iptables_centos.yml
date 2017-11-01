@@ -1,0 +1,33 @@
+---
+- hosts: master
+  tasks:
+  - name: Copying Master Firewall v4 rules 
+    copy: src=/home/masterbee/ansible/files/master/centos/iptables.config dest=/etc/sysconfig/iptables owner=root group=root mode=0744 backup=yes
+
+    notify:
+    - restart iptables
+
+  - name: iptables enabled 
+    service: name=iptables state=started enabled=yes
+  #
+  # Does not reload rules 
+  #
+  handlers:
+        - name: restart iptables
+          service: name=iptables state=restarted
+
+- hosts: drone
+  tasks:
+  - name: Copying Master Firewall v4 rules 
+    copy: src=/home/masterbee/ansible/files/drone/centos/iptables dest=/etc/sysconfig/iptables owner=root group=root mode=0744 backup=yes
+
+    notify:
+    - restart iptables
+
+  - name: Netfilter enabled 
+    service: name=iptables state=started enabled=yes
+
+  handlers:
+        - name: restart iptables
+          service: name=iptables state=restarted
+
