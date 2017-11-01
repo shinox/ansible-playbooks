@@ -28,7 +28,7 @@
 
   - name: Add bee config to smb.conf
   #  copy: src=/home/masterbee/ansible/files/master/smb.conf dest=/etc/samba/smb.conf owner=root group=root mode=0744 backup=yes
-  ## OR 
+  ## OR lineinfile loop approach
     lineinfile:
         dest: /etc/samba/smb.conf
         regexp: "^# {{ item }}"
