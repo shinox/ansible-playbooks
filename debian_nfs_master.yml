@@ -1,0 +1,68 @@
+---
+- hosts: master
+  tasks:
+  - name: Install/update nfs-kernel-server package
+    apt:
+        name: nfs-kernel-server
+        state: latest
+
+  - name: Install/update nfs-common package
+    apt:
+        name: nfs-common
+        state: latest
+
+  - name: Create beegfs NFS mount
+    file: path=/mnt/beegfs state=directory
+
+  - name: Add NFS config 
+    copy: src=/home/masterbee/ansible/files/master/exports dest=/etc/exports owner=root group=root mode=0744 backup=yes
+
+  - name: Add NFS config 
+    lineinfile:
+          dest=/etc/sysctl.d/nfs-static-ports.conf
+          regexp="^fs.nfs.nfs_callback_tcpport ="
+          line="fs.nfs.nfs_callback_tcpport = 32764"
+  - name: Add NFS config 
+    lineinfile:
+          dest=/etc/sysctl.d/nfs-static-ports.conf
+          regexp="^fs.nfs.nlm_tcpport ="
+          line="fs.nfs.nlm_tcpport = 32768"
+  - name: Add NFS config 
+    lineinfile:
+          dest=/etc/sysctl.d/nfs-static-ports.conf
+          regexp="^fs.nfs.nlm_udpport ="
+          line="fs.nfs.nlm_udpport = 32768"
+
+  - name: Add NFS common ports
+    lineinfile:
+          dest=/etc/default/nfs-common
+          regexp="^STATDOPTS="
+          line='STATDOPTS="--port 32765 --outgoing-port 32766"'
+          owner=root        
+          backup=yes
+
+  - name: Add NFS RPC ports
+    lineinfile:
+          dest=/etc/default/nfs-kernel-server
+          regexp="^RPCMOUNTDOPTS="
+          line='RPCMOUNTDOPTS="-p 32769"'
+          backup=yes
+          owner=root
+
+  - name: Add NFS RPC ports
+    lineinfile:
+          dest=/etc/default/quota
+          regexp="^RPCRQUOTADOPTS="
+          line='RPCRQUOTADOPTS="-p 875"'
+          owner=root
+          create=True
+
+  - name: NFS enabled
+    service: name=nfs-kernel-server state=started enabled=yes
+    notify:
+      - restart nfs-kernel-server 
+
+
+  handlers:
+  - name: restart nfs-kernel-server
+    command: sysctl --system && /etc/init.d/nfs-kernel-server restart
