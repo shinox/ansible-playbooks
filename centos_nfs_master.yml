@@ -1,0 +1,70 @@
+---
+- hosts: master
+  tasks:
+  - name: Install/update nfs-utils package
+    yum:
+        name: nfs-utils
+        state: latest
+
+  - name: Install/update nfs-utils-lib package
+    yum:
+        name: nfs-utils-lib
+        state: latest
+
+  - name: Create beegfs NFS mount
+    file: path=/mnt/beegfs state=directory
+
+  - name: Add NFS config 
+    copy: src=/home/masterbee/ansible/files/master/exports dest=/etc/exports owner=root group=root mode=0744 backup=yes
+
+  - name: Add NFS config 
+    lineinfile:
+              dest=/etc/sysconfig/nfs
+              regexp="^RQUOTAD_PORT="
+              line="RQUOTAD_PORT=875"
+              owner=root
+              backup=yes
+  - name: Add NFS config 
+    lineinfile:
+              dest=/etc/sysconfig/nfs
+              regexp="^LOCKD_TCPPORT="
+              line="LOCKD_TCPPORT=32803"
+              owner=root
+  - name: Add NFS config 
+    lineinfile:
+              dest=/etc/sysconfig/nfs
+              regexp="^LOCKD_UDPPORT="
+              line="LOCKD_UDPPORT=32769"
+              owner=root
+  - name: Add NFS config 
+    lineinfile:
+              dest=/etc/sysconfig/nfs
+              regexp="^MOUNTD_PORT="
+              line="MOUNTD_PORT=892"
+              owner=root
+  - name: Add NFS config 
+    lineinfile:
+              dest=/etc/sysconfig/nfs
+              regexp="^STATD_PORT="
+              line="STATD_PORT=662"
+              owner=root
+
+  - name: NFS enabled
+    service: name=rpcbind state=started enabled=yes
+    notify:
+      - restart rpcbind
+
+  - name: Nfs enabled
+    service: name=nfs state=started enabled=yes
+    notify:
+      - restart nfs
+
+  - name: restart rpcbind
+    service:
+            name=rpcbind
+            state=restarted
+
+  - name: restart nfs
+    service:
+            name=nfs
+            state=restarted
