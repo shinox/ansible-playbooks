@@ -1,0 +1,51 @@
+---
+- hosts: hive
+  tasks:
+  - name: Install/update netfilter package
+    apt:   
+        name: netfilter-persistent
+        state: latest
+
+  - name: Install/update netfilter package
+    apt:   
+        name: iptables-persistent
+        state: latest
+
+- hosts: tulip
+  tasks:
+  - name: Copying Master Firewall v4 rules 
+    copy: src=/home/masterbee/ansible/files/master/debian/rules.v4 dest=/etc/iptables/rules.v4 owner=root group=root mode=0744 backup=yes
+
+  - name: Copying Master Firewall v6 rules
+    copy: src=/home/masterbee/ansible/files/master/debian/rules.v6 dest=/etc/iptables/rules.v6 owner=root group=root mode=0744 backup=yes
+
+    notify:
+    - restart netfilter-persistent
+
+  - name: Netfilter enabled 
+    service: name=netfilter-persistent state=started enabled=yes
+  #
+  # Does not reload rules 
+  #
+  handlers:
+        - name: restart netfilter-persistent
+          service: name=netfilter-persistent state=restarted
+
+- hosts: drone
+  tasks:
+  - name: Copying Master Firewall v4 rules 
+    copy: src=/home/masterbee/ansible/files/drone/debian/rules.v4 dest=/etc/iptables/rules.v4 owner=root group=root mode=0744 backup=yes
+
+  - name: Copying Master Firewall v6 rules
+    copy: src=/home/masterbee/ansible/files/drone/debian/rules.v6 dest=/etc/iptables/rules.v6 owner=root group=root mode=0744 backup=yes
+
+    notify:
+    - restart netfilter-persistent
+
+  - name: Netfilter enabled 
+    service: name=netfilter-persistent state=restarted enabled=yes
+
+  handlers:
+        - name: restart netfilter-persistent
+          service: name=netfilter-persistent state=restarted
+
