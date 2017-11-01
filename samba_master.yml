@@ -1,0 +1,58 @@
+---
+- hosts: master
+  tasks:
+  - name: Install/update samba package
+    apt:
+        name: samba
+        state: latest
+    when: ansible_os_family == "Debian"
+
+  - name: Install/update samba package
+    yum:
+        name: samba
+        state: latest
+    when: ansible_os_family == "Centos"
+
+  - name: Create beegfs CIFS mount
+    file: path=/mnt/beegfs state=directory
+
+  - name: Add bee config to smb.conf
+    copy: src=/home/masterbee/ansible/files/master/smb.conf dest=/etc/samba/smb.conf owner=root group=root mode=0744 backup=yes
+    # lineinfile:
+    #  dest=/etc/samba/smb.conf
+    #  line="[beegfs] \
+    #        comment = BeeGFS file system \
+    #        public = yes \
+    #        path = /mnt/beegfs \
+    #        browsable = yes \
+    #        writable = yes \
+    #        read only = no \
+    #        valid users = beegfs"
+    #   owner=root
+    #   state=present
+    #   insertafter=EOF
+    #   create=False
+
+    notify:
+      - restart samba
+
+  - name: samba enabled
+    service: name=smbd state=started enabled=yes
+    when: ansible_os_family == "Debian"
+
+  - name: samba enabled
+    service: name=smb state=started enabled=yes
+    when: ansible_os_family == "Centos"
+
+  handlers:
+  - name: restart samba
+    service:
+      name=smbd
+      state=restarted
+    when: ansible_os_family == "Debian"
+
+  - name: restart samba
+    service:
+      name=smb
+      state=restarted
+    when: ansible_os_family == "Centos"
