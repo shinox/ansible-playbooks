@@ -14,7 +14,7 @@
 #    4.) .yml ansible script is always generated but 
 #        users already present in server configs are not updated,
 #
-PLAYBOOKS="/home/masterbee/ansible/playbooks"
+PLAYBOOKS="/home/<USER_NAME>/ansible/playbooks"
 # Get list from file then just apply to server and generate .yml "butter on bread"
 FILE=$1
 
