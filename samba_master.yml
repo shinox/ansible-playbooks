@@ -39,7 +39,7 @@
   ## OR lineinfile loop approach
     lineinfile:
         dest: /etc/samba/smb.conf
-        regexp: "^# {{ item }}"
+        regexp: "^{{ item }}"
         line:   "{{ item }}" 
         owner:  root
         state:  present
