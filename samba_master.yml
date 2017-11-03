@@ -2,7 +2,8 @@
 - hosts: master
   vars:
       smbconfig:
-          - - "comment = BeeGFS file system "
+          - - "[beegfs] "
+            - "comment = BeeGFS file system "
             - "public = yes "
             - "path = /mnt/beegfs "
             - "browsable = yes "
@@ -10,6 +11,7 @@
             - "read only = no "
             - "valid users = beegfs"
             - "#======================= FS Spacer ======================="
+            - "[lizardfs] "
             - "comment = LizardFS file system "
             - "public = yes "
             - "path = /lizardfs "
