@@ -9,6 +9,14 @@
             - "writable = yes "
             - "read only = no "
             - "valid users = beegfs"
+            - "#======================= FS Spacer ======================="
+            - "comment = LizardFS file system "
+            - "public = yes "
+            - "path = /lizardfs "
+            - "browsable = yes "
+            - "writable = yes "
+            - "read only = no "
+            - "valid users = lizard"
             
   tasks:
   - name: Install/update samba package
